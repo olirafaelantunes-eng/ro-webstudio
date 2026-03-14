@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>MelhorIA • IA que transforma seu negócio</title>
+ <style>
+ :root {
+   --bg: #0A0A0A;
+   --accent: #00FF9D;
+   --accent2: #00BFFF;
+   --text: #E0E0E0;
+   --card: #121212;
+   --glow: rgba(0, 255, 157, 0.6);
+ }
+
+ * { margin: 0; padding: 0; box-sizing: border-box; }
+ body {
+   font-family: 'Segoe UI', system-ui, sans-serif;
+   background: var(--bg);
+   color: var(--text);
+   overflow-x: hidden;
+ }
+
+ /* ── NOVA ANIMAÇÃO DE CARREGAMENTO ── ESFERA HOLOGRÁFICA 3D ── */
+ #loading-screen {
+   position: fixed;
+   inset: 0;
+   background: var(--bg);
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   z-index: 10000;
+   gap: 60px;
+   transition: opacity 1.2s ease;
+ }
+
+ .neural-orb {
+   position: relative;
+   width: 280px;
+   height: 280px;
+   perspective: 1200px;
+ }
+
+ .orb-core {
+   position: absolute;
+   inset: 0;
+   background: radial-gradient(circle at 40% 40%, #00FF9D, #00BFFF, transparent 70%);
+   border-radius: 50%;
+   box-shadow: 
+     0 0 80px #00FF9D,
+     0 0 140px #00BFFF,
+     inset 0 0 60px rgba(255,255,255,0.25);
+   animation: orbPulse 4s ease-in-out infinite;
+ }
+
+ .ring-orb {
+   position: absolute;
+   inset: 0;
+   border: 3px solid transparent;
+   border-radius: 50%;
+   animation: ringSpin 6s linear infinite;
+ }
+
+ .ring-orb:nth-child(1) { border-top-color: #00FF9D; animation-duration: 4.5s; }
+ .ring-orb:nth-child(2) { border-bottom-color: #00BFFF; animation-duration: 7s; animation-direction: reverse; transform: rotateX(70deg); }
+
+ .logo-holo {
+   position: absolute;
+   inset: 0;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 5.2rem;
+   font-weight: 900;
+   color: #ffffff;
+   text-shadow: 
+     0 0 20px #00FF9D,
+     0 0 40px #00BFFF,
+     0 0 70px #00FF9D,
+     0 0 100px rgba(0,255,157,0.8);
+   animation: holoFloat 5s ease-in-out infinite;
+   z-index: 2;
+ }
+
+ .particle {
+   position: absolute;
+   width: 6px;
+   height: 6px;
+   background: #00FF9D;
+   border-radius: 50%;
+   box-shadow: 0 0 15px #00FF9D;
+   animation: particleFloat 8s linear infinite;
+   opacity: 0.7;
+ }
+
+ @keyframes orbPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+ @keyframes ringSpin { to { transform: rotate(360deg); } }
+ @keyframes holoFloat { 0%,100% { transform: translateY(0) rotateX(0deg); } 50% { transform: translateY(-25px) rotateX(12deg); } }
+ @keyframes particleFloat {
+   0% { transform: scale(0.5) translate(0,0); opacity: 0; }
+   100% { transform: scale(0) translate(var(--x), var(--y)); opacity: 0; }
+ }
+
+ .loading-text {
+   color: var(--accent);
+   font-size: 1.45rem;
+   font-weight: 700;
+   letter-spacing: 6px;
+   text-shadow: 0 0 30px var(--glow);
+   animation: pulseText 2s infinite;
+ }
+
+ @keyframes pulseText { 0%,100% { opacity: 0.65; } 50% { opacity: 1; } }
+
+ /* ── O RESTO DO SEU CSS ORIGINAL (mantido intacto) ── */
+ #login-screen {
+   position: fixed;
+   inset: 0;
+   background: linear-gradient(135deg, #0A0A0A, #1A1A2E);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 9999;
+   transition: opacity 0.8s ease;
+ }
+ .login-card {
+   background: #121212;
+   width: 100%;
+   max-width: 420px;
+   padding: 48px 40px;
+   border-radius: 24px;
+   box-shadow: 0 0 80px rgba(0, 255, 157, 0.15);
+   text-align: center;
+   animation: loginPop 0.8s ease;
+ }
+ @keyframes loginPop {
+   from { transform: scale(0.8); opacity: 0; }
+   to { transform: scale(1); opacity: 1; }
+ }
+ .logo-login {
+   font-size: 3.2rem;
+   font-weight: 900;
+   background: linear-gradient(90deg, #00FF9D, #00BFFF);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+   margin-bottom: 12px;
+ }
+ .login-card h1 {
+   font-size: 1.8rem;
+   margin-bottom: 8px;
+ }
+ .login-card p {
+   color: #888;
+   margin-bottom: 32px;
+ }
+ input {
+   width: 100%;
+   padding: 16px 20px;
+   margin-bottom: 16px;
+   background: #1F1F1F;
+   border: 2px solid #333;
+   border-radius: 16px;
+   color: white;
+   font-size: 1.05rem;
+   transition: all 0.3s;
+ }
+ input:focus {
+   border-color: var(--accent);
+   outline: none;
+   box-shadow: 0 0 0 4px rgba(0, 255, 157, 0.2);
+ }
+ .btn-login {
+   width: 100%;
+   padding: 18px;
+   background: linear-gradient(90deg, #00FF9D, #00BFFF);
+   color: #000;
+   font-weight: 800;
+   font-size: 1.2rem;
+   border: none;
+   border-radius: 16px;
+   cursor: pointer;
+   transition: all 0.4s;
+ }
+ .btn-login:hover {
+   transform: translateY(-4px);
+   box-shadow: 0 20px 40px rgba(0, 255, 157, 0.4);
+ }
+ #main-content {
+   display: none;
+ }
+ nav {
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   background: rgba(10,10,10,0.95);
+   backdrop-filter: blur(20px);
+   z-index: 1000;
+   padding: 20px 5%;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   border-bottom: 1px solid #222;
+ }
+ .nav-left {
+   display: flex;
+   align-items: center;
+   gap: 24px;
+ }
+ .nav-logo {
+   font-size: 2rem;
+   font-weight: 900;
+   background: linear-gradient(90deg, #00FF9D, #00BFFF);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+ }
+ .gear-nav {
+   width: 48px;
+   height: 48px;
+   background: #1F1F1F;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 1.8rem;
+   cursor: pointer;
+   box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+ }
+ .gear-nav:hover {
+   transform: rotate(180deg) scale(1.15);
+ }
+ .nav-links {
+   display: flex;
+   gap: 32px;
+   list-style: none;
+ }
+ .nav-links a {
+   color: var(--text);
+   text-decoration: none;
+   font-weight: 600;
+   transition: color 0.3s;
+ }
+ .nav-links a:hover {
+   color: var(--accent);
+ }
+ .hero {
+   height: 100vh;
+   background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.85)), url('https://picsum.photos/id/1015/1920/1080') center/cover;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   text-align: center;
+   position: relative;
+   overflow: hidden;
+ }
+ .hero::before {
+   content: '';
+   position: absolute;
+   inset: 0;
+   background: radial-gradient(circle at 50% 30%, rgba(0,255,157,0.15), transparent 70%);
+   animation: pulse 8s infinite ease-in-out;
+ }
+ @keyframes pulse {
+   0%, 100% { opacity: 0.6; }
+   50% { opacity: 1; }
+ }
+ .hero-content {
+   max-width: 820px;
+   z-index: 2;
+ }
+ .hero h1 {
+   font-size: 4.2rem;
+   line-height: 1.1;
+   margin-bottom: 20px;
+   background: linear-gradient(90deg, #00FF9D, #00BFFF);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+ }
+ .hero p {
+   font-size: 1.4rem;
+   margin-bottom: 40px;
+   opacity: 0.9;
+ }
+ #profile-popover {
+   position: fixed;
+   top: 90px;
+   left: 100px;
+   background: #1F1F1F;
+   width: 280px;
+   border-radius: 20px;
+   padding: 20px;
+   box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+   display: none;
+   flex-direction: column;
+   gap: 12px;
+   z-index: 1001;
+ }
+ section {
+   padding: 120px 5% 100px;
+ }
+ .section-title {
+   font-size: 3rem;
+   text-align: center;
+   margin-bottom: 60px;
+   background: linear-gradient(90deg, #00FF9D, #00BFFF);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+ }
+ .packages-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+   gap: 30px;
+ }
+ .package-card {
+   background: var(--card);
+   border-radius: 24px;
+   overflow: hidden;
+   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+   position: relative;
+ }
+ .package-card:hover {
+   transform: translateY(-20px) scale(1.03);
+   box-shadow: 0 30px 70px rgba(0, 255, 157, 0.25);
+ }
+ .package-card img {
+   width: 100%;
+   height: 240px;
+   object-fit: cover;
+ }
+ .package-card .content {
+   padding: 28px;
+ }
+ .package-card h3 {
+   font-size: 1.6rem;
+   margin-bottom: 12px;
+ }
+ .package-card .price {
+   font-size: 2rem;
+   font-weight: 800;
+   color: var(--accent);
+   margin: 12px 0;
+ }
+ .btn-ver {
+   width: 100%;
+   padding: 16px;
+   background: transparent;
+   border: 2px solid var(--accent);
+   color: var(--accent);
+   font-weight: 700;
+   border-radius: 16px;
+   cursor: pointer;
+   transition: all 0.3s;
+ }
+ .btn-ver:hover {
+   background: var(--accent);
+   color: #000;
+ }
+ .modal {
+   position: fixed;
+   inset: 0;
+   background: rgba(0,0,0,0.92);
+   display: none;
+   align-items: center;
+   justify-content: center;
+   z-index: 2000;
+ }
+ .modal-content {
+   background: #121212;
+   max-width: 620px;
+   width: 92%;
+   border-radius: 28px;
+   padding: 40px;
+   position: relative;
+   animation: modalPop 0.5s ease;
+ }
+ @keyframes modalPop {
+   from { transform: scale(0.7) translateY(60px); opacity: 0; }
+   to { transform: scale(1) translateY(0); opacity: 1; }
+ }
+ .close-modal {
+   position: absolute;
+   top: 20px;
+   right: 24px;
+   font-size: 2rem;
+   cursor: pointer;
+   color: #666;
+ }
+ .checkout-success {
+   text-align: center;
+   padding: 40px 20px;
+ }
+ .success-icon {
+   font-size: 5rem;
+   color: var(--accent);
+   animation: successPop 1s ease;
+ }
+ @keyframes successPop {
+   0% { transform: scale(0); }
+   60% { transform: scale(1.3); }
+   100% { transform: scale(1); }
+ }
+ footer {
+   background: #0A0A0A;
+   padding: 60px 5% 30px;
+   text-align: center;
+   border-top: 1px solid #222;
+ }
+ .wa-btn {
+   display: inline-flex;
+   align-items: center;
+   gap: 12px;
+   background: #25D366;
+   color: white;
+   padding: 16px 32px;
+   border-radius: 50px;
+   font-weight: 700;
+   text-decoration: none;
+   font-size: 1.1rem;
+   margin-top: 20px;
+ }
+
+ /* Link para compartilhar no rodapé */
+ .site-link-box {
+   margin-top: 30px;
+   font-size: 1.05rem;
+   color: var(--text);
+ }
+ .site-link {
+   background: #1F1F1F;
+   border: 1px solid #333;
+   border-radius: 16px;
+   padding: 14px 24px;
+   margin-top: 12px;
+   cursor: pointer;
+   display: inline-block;
+   transition: all 0.3s;
+ }
+ .site-link:hover {
+   background: #2a2a2a;
+   box-shadow: 0 0 20px rgba(0,255,157,0.2);
+ }
+
+ </style>
+</head>
+<body>
+
+ <!-- NOVA TELA DE CARREGAMENTO ── ESFERA HOLOGRÁFICA 3D ── -->
+ <div id="loading-screen">
+   <div class="neural-orb">
+     <div class="orb-core"></div>
+     <div class="ring-orb"></div>
+     <div class="ring-orb"></div>
+     
+     <div class="logo-holo">MelhorIA</div>
+
+     <!-- Partículas flutuantes -->
+     <div class="particle" style="--x:-90px; --y:-110px; animation-delay:0s;"></div>
+     <div class="particle" style="--x:85px; --y:-75px; animation-delay:1.3s;"></div>
+     <div class="particle" style="--x:-55px; --y:95px; animation-delay:2.7s;"></div>
+     <div class="particle" style="--x:110px; --y:45px; animation-delay:0.8s;"></div>
+   </div>
+   <div class="loading-text">CARREGANDO COM IA...</div>
+ </div>
+
+ <!-- LOGIN SCREEN -->
+ <div id="login-screen" style="display:none;">
+ <div class="login-card">
+ <div class="logo-login">MelhorIA</div>
+ <h1>Bem-vindo de volta</h1>
+ <p>Faça login para acessar os pacotes com IA</p>
+ <input type="email" id="email" placeholder="seu@email.com" value="cliente@melhoria.com">
+ <input type="password" id="password" placeholder="Senha" value="melhoria123">
+ <button onclick="fazerLogin()" class="btn-login">ENTRAR COM SEGURANÇA</button>
+ <p style="margin-top:24px; font-size:0.9rem; color:#666;">
+ Demo • Qualquer senha funciona<br>
+ <small>Empresa MelhorIA • Coronel Fabriciano - MG</small>
+ </p>
+ </div>
+ </div>
+
+ <!-- MAIN CONTENT -->
+ <div id="main-content">
+ <!-- NAVBAR -->
+ <nav>
+ <div class="nav-left">
+ <div class="nav-logo">MelhorIA</div>
+ <div onclick="toggleProfile()" class="gear-nav"> </div>
+ </div>
+ <ul class="nav-links">
+ <li><a href="#home" onclick="smoothScroll('#home')">Início</a></li>
+ <li><a href="#sites" onclick="smoothScroll('#sites')">Sites</a></li>
+ <li><a href="#imagens" onclick="smoothScroll('#imagens')">Imagens IA</a></li>
+ <li><a href="#videos" onclick="smoothScroll('#videos')">Vídeos IA</a></li>
+ </ul>
+ </nav>
+
+ <!-- HERO -->
+ <section id="home" class="hero">
+ <div class="hero-content">
+ <h1>IA que faz seu negócio<br>brilhar em segundos</h1>
+ <p>Sites profissionais • Imagens ultra-realistas • Vídeos editados com inteligência artificial</p>
+ <button onclick="document.getElementById('sites').scrollIntoView({behavior:'smooth'})"
+ style="padding:18px 42px; font-size:1.3rem; background:#00FF9D; color:#000; border:none; border-radius:50px; font-weight:800; cursor:pointer;">
+ ESCOLHER MEU PACOTE
+ </button>
+ </div>
+ </section>
+
+ <!-- PACOTES SITES -->
+ <section id="sites">
+ <h2 class="section-title">Pacotes de Sites Simples com IA</h2>
+ <div class="packages-grid">
+ <div class="package-card">
+ <img src="https://picsum.photos/id/1015/800/600" alt="Site Básico com IA">
+ <div class="content">
+ <h3>Site Básico</h3>
+ <div class="price">R$ 497</div>
+ <p>Landing page moderna + formulário + WhatsApp</p>
+ <button onclick="abrirDetalhes(1)" class="btn-ver">VER DETALHES</button>
+ </div>
+ </div>
+ <div class="package-card">
+ <img src="https://picsum.photos/id/201/800/600" alt="Site Profissional com IA">
+ <div class="content">
+ <h3>Site Profissional</h3>
+ <div class="price">R$ 997</div>
+ <p>Site completo com 5 páginas + SEO + integração WhatsApp</p>
+ <button onclick="abrirDetalhes(2)" class="btn-ver">VER DETALHES</button>
+ </div>
+ </div>
+ <div class="package-card">
+ <img src="https://picsum.photos/id/29/800/600" alt="Site Premium com IA">
+ <div class="content">
+ <h3>Site Premium</h3>
+ <div class="price">R$ 1.997</div>
+ <p>E-commerce + blog + IA de atendimento 24h</p>
+ <button onclick="abrirDetalhes(3)" class="btn-ver">VER DETALHES</button>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- PACOTES IMAGENS -->
+ <section id="imagens" style="background:#111;">
+ <h2 class="section-title">Melhoria de Imagens com IA</h2>
+ <div class="packages-grid">
+ <div class="package-card">
+ <img src="https://picsum.photos/id/312/800/600" alt="Melhoria de Imagens IA">
+ <div class="content">
+ <h3>10 Imagens Ultra HD</h3>
+ <div class="price">R$ 97</div>
+ <p>Remova fundo, aumente resolução, melhore cores</p>
+ <button onclick="abrirDetalhes(4)" class="btn-ver">VER DETALHES</button>
+ </div>
+ </div>
+ <div class="package-card">
+ <img src="https://picsum.photos/id/431/800/600" alt="Pacote de Imagens IA">
+ <div class="content">
+ <h3>50 Imagens Pro</h3>
+ <div class="price">R$ 297</div>
+ <p>Pacote completo para redes sociais e site</p>
+ <button onclick="abrirDetalhes(5)" class="btn-ver">VER DETALHES</button>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- PACOTES VÍDEOS -->
+ <section id="videos">
+ <h2 class="section-title">Edição de Vídeos com IA</h2>
+ <div class="packages-grid">
+ <div class="package-card">
+ <img src="https://picsum.photos/id/160/800/600" alt="Edição de Vídeo com IA">
+ <div class="content">
+ <h3>1 Vídeo Editado</h3>
+ <div class="price">R$ 197</div>
+ <p>Cortes inteligentes, legendas automáticas, música IA</p>
+ <button onclick="abrirDetalhes(6)" class="btn-ver">VER DETALHES</button>
+ </div>
+ </div>
+ <div class="package-card">
+ <img src="https://picsum.photos/id/1016/800/600" alt="Pacote de Reels com IA">
+ <div class="content">
+ <h3>5 Vídeos Reels</h3>
+ <div class="price">R$ 797</div>
+ <p>Pacote completo para Instagram e TikTok</p>
+ <button onclick="abrirDetalhes(7)" class="btn-ver">VER DETALHES</button>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- FOOTER -->
+ <footer>
+ <p style="font-size:1.1rem; opacity:0.8;">MelhorIA © 2026 • Transformando negócios com inteligência artificial</p>
+ <p style="margin:12px 0;">Coronel Fabriciano - MG | (31) 99800-7868</p>
+
+ <div class="site-link-box">
+   Compartilhar este site:<br>
+   <div class="site-link" onclick="navigator.clipboard.writeText(window.location.href); alert('Link copiado! Pode enviar agora.')">
+     Clique aqui para copiar o link
+   </div>
+ </div>
+ </footer>
+ </div>
+
+ <!-- PROFILE POPOVER -->
+ <div id="profile-popover">
+ <div style="display:flex; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid #333;">
+ <div style="width:48px;height:48px;background:#00FF9D;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;"> </div>
+ <div>
+ <strong id="user-name">Cliente Demo</strong><br>
+ <small id="user-email">cliente@melhoria.com</small>
+ </div>
+ </div>
+ <button onclick="verPedidos()" style="width:100%;padding:14px;background:transparent;border:1px solid #00FF9D;color:#00FF9D;border-radius:12px;margin-top:12px;">Ver meus pedidos</button>
+ <button onclick="fazerLogout()" style="width:100%;padding:14px;background:#FF3B5C;color:white;border:none;border-radius:12px;margin-top:8px;">Sair da conta</button>
+ </div>
+
+ <!-- MODAL DETALHES -->
+ <div id="modal-detalhes" class="modal" onclick="if(event.target===this) fecharModal()">
+ <div class="modal-content" onclick="event.stopImmediatePropagation()">
+ <span onclick="fecharModal()" class="close-modal">×</span>
+ <div id="modal-content-inner"></div>
+ </div>
+ </div>
+
+ <!-- MODAL CHECKOUT SUCCESS -->
+ <div id="modal-sucesso" class="modal" onclick="if(event.target===this) fecharSucesso()">
+ <div class="modal-content checkout-success" onclick="event.stopImmediatePropagation()">
+ <div class="success-icon"> </div>
+ <h2 style="margin:20px 0 12px; font-size:2rem;">Compra realizada com sucesso!</h2>
+ <p id="mensagem-compra" style="font-size:1.1rem; opacity:0.9; margin-bottom:30px;"></p>
+ <a id="wa-link" href="#" target="_blank" class="wa-btn">
+ Enviar mensagem no WhatsApp
+ </a>
+ <p style="margin-top:30px; font-size:0.95rem; opacity:0.7;">Você receberá o arquivo em até 24h</p>
+ </div>
+ </div>
+
+ <script>
+ // Dados simulados de pacotes
+ const pacotes = {
+ 1: { nome: "Site Básico", preco: "497", desc: "Landing page completa com design moderno, formulário de contato e botão de WhatsApp. Entrega em 48 horas.", features: " Design responsivo<br> SEO básico<br> Integração WhatsApp<br> 1 ano de hospedagem" },
+ 2: { nome: "Site Profissional", preco: "997", desc: "Site completo com até 5 páginas, blog e integração com redes sociais.", features: " Todas as funcionalidades do Básico<br> Blog integrado<br> Formulários avançados<br> Google Analytics" },
+ 3: { nome: "Site Premium", preco: "1997", desc: "E-commerce completo com IA de atendimento e painel administrativo.", features: " Loja virtual<br> Chatbot IA<br> Pagamentos online<br> Suporte prioritário" },
+ 4: { nome: "10 Imagens Ultra HD", preco: "97", desc: "Melhoria automática de resolução, remoção de fundo e cores vibrantes com IA.", features: " Até 4K<br> Remoção de fundo<br> Estilo profissional" },
+ 5: { nome: "50 Imagens Pro", preco: "297", desc: "Pacote ideal para redes sociais e catálogo de produtos.", features: " 50 imagens<br> Consistência visual<br> Formatos para Instagram, Facebook e site" },
+ 6: { nome: "1 Vídeo Editado", preco: "197", desc: "Edição completa com cortes inteligentes, legendas automáticas e música gerada por IA.", features: " Até 5 minutos<br> Legendas em português<br> Efeitos profissionais" },
+ 7: { nome: "5 Vídeos Reels", preco: "797", desc: "Pacote completo para crescer no Instagram e TikTok.", features: " 5 vídeos de 15-60s<br> Tendências atuais<br> Legendas e música viral" }
+ };
+let usuarioAtual = null;
+
+// === FUNÇÕES ATUALIZADAS COM BANCO DE DADOS ===
+
+function fazerLogin() {
+  const email = document.getElementById('email').value || "cliente@melhoria.com";
+  const senha = document.getElementById('password').value;
+
+  fetch('login.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, senha })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.sucesso) {
+      usuarioAtual = { email: email, nome: "Cliente Demo" };
+      document.getElementById('login-screen').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        document.getElementById('user-name').textContent = usuarioAtual.nome;
+        document.getElementById('user-email').textContent = usuarioAtual.email;
+      }, 600);
+    } else {
+      alert(data.erro || "Email ou senha incorretos");
+    }
+  });
+}
+function cadastrar() {
+  const email = document.getElementById('email').value;
+  const senha = document.getElementById('password').value;
+
+  fetch('cadastrar.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, senha })
+  })
+  .then(r => r.json())
+  .then(data => {
+    alert(data.mensagem);
+  });
+}
+function comprarAgora(id) {
+  fecharModal();
+  const p = pacotes[id];
+
+  fetch('salvar_pedido.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      pacote_nome: p.nome,
+      valor: parseFloat(p.preco)
+    })
+  }) 
+.then(r => r.json())
+  .then(data => {
+    if (data.sucesso) {
+      const mensagem = `Olá MelhorIA!%0A%0AAcabei de comprar o pacote *${p.nome}* (R$ ${p.preco}) no site.%0A%0AMeu e-mail: ${usuarioAtual ? usuarioAtual.email : 'cliente@melhoria.com'}%0A%0AEstou aguardando o contato!`;
+      const waLink = `https://wa.me/5531998007868?text=${mensagem}`;
+
+      document.getElementById('mensagem-compra').innerHTML = `
+        Você comprou: <strong>${p.nome}</strong><br>
+        Valor: <strong>R$ ${p.preco}</strong><br><br>
+        Pedido salvo no sistema com sucesso!
+      `;
+      document.getElementById('wa-link').href = waLink;
+      document.getElementById('modal-sucesso').style.display = 'flex';
+    } else {
+      alert("Erro ao salvar: " + (data.erro || "Tente novamente"));
+    }
+  });
+}
+ function toggleProfile() {
+ const pop = document.getElementById('profile-popover');
+ pop.style.display = pop.style.display === 'flex' ? 'none' : 'flex';
+ }
+ function fazerLogout() {
+ localStorage.removeItem('melhoria_user');
+ location.reload();
+ }
+ function verPedidos() {
+ alert(" Seus pedidos aparecerão aqui em breve!\n\n(Em produção - Demo)");
+ toggleProfile();
+ }
+ function abrirDetalhes(id) {
+ const p = pacotes[id];
+ const html = `
+ <h2 style="margin-bottom:16px;">${p.nome}</h2>
+ <div style="font-size:2.4rem; font-weight:900; color:#00FF9D; margin-bottom:24px;">R$ ${p.preco}</div>
+ <p style="font-size:1.15rem; line-height:1.6; margin-bottom:24px;">${p.desc}</p>
+ <div style="background:#1F1F1F; padding:20px; border-radius:16px; font-size:1.05rem; line-height:1.8;">
+ ${p.features}
+ </div>
+ <button onclick="comprarAgora(${id});"
+ style="margin-top:32px; width:100%; padding:18px; background:#00FF9D; color:#000; font-weight:800; font-size:1.2rem; border:none; border-radius:16px;">
+ QUERO COMPRAR AGORA
+ </button>
+ `;
+ document.getElementById('modal-content-inner').innerHTML = html;
+ document.getElementById('modal-detalhes').style.display = 'flex';
+ }
+ function fecharModal() {
+ document.getElementById('modal-detalhes').style.display = 'none';
+ }
+ function comprarAgora(id) {
+ fecharModal();
+ const p = pacotes[id];
+ const mensagem = `Olá MelhorIA!%0A%0AAcabei de comprar o pacote *${p.nome}* (R$ ${p.preco}) no site.%0A%0AMeu e-mail: ${usuarioAtual ? usuarioAtual.email : 'cliente@melhoria.com'}%0A%0AEstou aguardando o contato!`;
+ const waLink = `https://wa.me/5531998007868?text=${mensagem}`;
+ document.getElementById('mensagem-compra').innerHTML = `
+ Você comprou: <strong>${p.nome}</strong><br>
+ Valor: <strong>R$ ${p.preco}</strong><br><br>
+ Em breve entraremos em contato!
+ `;
+ document.getElementById('wa-link').href = waLink;
+ document.getElementById('modal-sucesso').style.display = 'flex';
+ let pedidos = JSON.parse(localStorage.getItem('melhoria_pedidos') || '[]');
+ pedidos.push({ id: Date.now(), pacote: p.nome, valor: p.preco, data: new Date().toLocaleDateString('pt-BR') });
+ localStorage.setItem('melhoria_pedidos', JSON.stringify(pedidos));
+ }
+ function fecharSucesso() {
+ document.getElementById('modal-sucesso').style.display = 'none';
+ }
+ function smoothScroll(target) {
+ document.querySelector(target).scrollIntoView({ behavior: 'smooth' });
+ }
+
+window.onload = () => {
+  setTimeout(() => {
+    document.getElementById('loading-screen').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+    }, 900);
+  }, 2600);
+};
+
+document.addEventListener('click', function(e) {
+  const pop = document.getElementById('profile-popover');
+  const gear = document.querySelector('.gear-nav');
+  if (!pop.contains(e.target) && e.target !== gear) {
+    pop.style.display = 'none';
+  }
+});
+ </script>
+</body>
+</html>
